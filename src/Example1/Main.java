@@ -6,12 +6,12 @@ class Client {
     private static final Pattern PASSPORT_PATTERN = Pattern.compile("^(\\d{4})\\s?(\\d{6})$");
 
     private final int id_client;
-    private final String full_name;
-    private final String phone;
+    private String full_name;
+    private String phone;
     private final String gender;
     private final LocalDate birthday;
-    private final String passport;
-    private final String comment;
+    private String passport;
+    private String comment;
 
     public Client(int id_client, String full_name, String phone, String gender, LocalDate birthday, String passport, String comment) {
         this.id_client = validateId(id_client);
@@ -22,7 +22,18 @@ class Client {
         this.passport = validatePassport(passport);
         this.comment = comment; // комментарий может быть null или любым
     }
-
+    public void setFull_name(String fullName){
+        this.full_name = validateFullName(fullName);
+    }
+    public void setPhonePattern(String phone){
+        this.phone = validatePhone(phone);
+    }
+    public void setPassport(String passport){
+        this.passport = validatePassport(passport);
+    }
+    public void setComment(String comment){
+        this.comment = comment;
+    }
     public static int validateId(int id) {
         if (id <= 0) {
             throw new IllegalArgumentException("ID клиента должен быть положительным числом");
