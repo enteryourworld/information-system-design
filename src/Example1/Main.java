@@ -25,7 +25,7 @@ class Client {
     public void setFull_name(String fullName){
         this.full_name = validateFullName(fullName);
     }
-    public void setPhonePattern(String phone){
+    public void setPhone(String phone){
         this.phone = validatePhone(phone);
     }
     public void setPassport(String passport){
@@ -40,22 +40,19 @@ class Client {
         }
         return id;
     }
-
-    public static String validateFullName(String fullName) {
-        if (fullName == null || fullName.isBlank()) {
-            throw new IllegalArgumentException("ФИО не может быть пустым");
+    public static String check(String value,String name){
+        if(value==null || value.isBlank()){
+            throw new IllegalArgumentException(name + " не может быть пустым или null");
         }
-        return fullName.trim();
+        return value.trim();
+    }
+    public static String validateFullName(String fullName) {
+        String trimmed = check(fullName, "ФИО");
+        return trimmed;
     }
 
     public static String validatePhone(String phone) {
-        if (phone == null) {
-            throw new IllegalArgumentException("Телефон не может быть null");
-        }
-        String trimmed = phone.trim();
-        if (trimmed.isEmpty()) {
-            throw new IllegalArgumentException("Телефон не может быть пустым");
-        }
+        String trimmed = check(phone, "Телефон");
         if (!PHONE_PATTERN.matcher(trimmed).matches()) {
             throw new IllegalArgumentException("Некорректный формат телефона: " + phone);
         }
@@ -63,10 +60,7 @@ class Client {
     }
 
     public static String validateGender(String gender) {
-        if (gender == null || gender.isBlank()) {
-            throw new IllegalArgumentException("Пол не может быть пустым");
-        }
-        String normalized = gender.trim().toUpperCase();
+        String normalized = check(gender, "Гендер");
         if (!normalized.equals("M") && !normalized.equals("F")) {
             throw new IllegalArgumentException("Недопустимое значение пола (ожидается M или F): " + gender);
         }
@@ -90,13 +84,7 @@ class Client {
     }
 
     public static String validatePassport(String passport) {
-        if (passport == null) {
-            throw new IllegalArgumentException("Паспорт не может быть null");
-        }
-        String trimmed = passport.trim();
-        if (trimmed.isEmpty()) {
-            throw new IllegalArgumentException("Данные паспорта не могут быть пустыми");
-        }
+        String trimmed = check(passport, "Паспорт");
         if (!PASSPORT_PATTERN.matcher(trimmed).matches()) {
             throw new IllegalArgumentException("Данные паспорта некорректны (ожидается 10 цифр): " + passport);
         }
