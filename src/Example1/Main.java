@@ -163,50 +163,118 @@ class Client {
                 parts.length > 6 && !parts[6].isBlank() ? parts[6].trim() : null
         );
     }
+    @Override
+    public String toString(){
+        return " Клиент '" + full_name +
+                "'\n Дата рождения "+ birthday +
+                "\n Номер телефона = " + phone +
+                "\n Пол = " + gender +
+                "\n Паспорт = "+ passport +
+                "\n Комметарий " + comment+ " ";
+    }
+    public String toShortString() {
+        return String.format("Client [ID: %d | %s | Тел: %s]",
+                id_client, getShortName(), phone);
+    }
+    private String getShortName() {
+        String[] parts = full_name.trim().split("\\s+");
+        if (parts.length == 1) {
+            return parts[0];
+        }
+        StringBuilder sb = new StringBuilder(parts[0]);
+        for (int i = 1; i < parts.length; i++) {
+            sb.append(" ").append(parts[i].charAt(0)).append(".");
+        }
+        return sb.toString();
+    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Client client = (Client) o;
+        return id_client == client.id_client &&
+                Objects.equals(passport, client.passport);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hash(id_client, passport);
+    }
+
+
 }
 
 void main() {
     //json
-    Path filePath = Path.of("clients.json");
-    try {
-        String jsonContent = Files.readString(filePath);
-        Client client = new Client(jsonContent);
-        System.out.println("Объект успешно создан из файла!");
-        System.out.println("ID: " + client.getId_client());
-        System.out.println("Имя: " + client.getFull_name());
-        System.out.println("Телефон: " + client.getPhone());
-        System.out.println("Паспорт: " + client.getPassport());
+//    Path filePath = Path.of("clients.json");
+//    try {
+//        String jsonContent = Files.readString(filePath);
+//        Client client = new Client(jsonContent);
+//        System.out.println("Объект успешно создан из файла!");
+//        System.out.println("ID: " + client.getId_client());
+//        System.out.println("Имя: " + client.getFull_name());
+//        System.out.println("Телефон: " + client.getPhone());
+//        System.out.println("Паспорт: " + client.getPassport());
+//
+//    } catch (IOException e) {
+//        System.err.println("Ошибка чтения файла (проверьте путь и имя файла): " + e.getMessage());
+//    } catch (IllegalArgumentException e) {
+//        System.err.println("Ошибка валидации данных из файла: " + e.getMessage());
+//    }
+//    //csv
+//    Path csvPath = Path.of("client.csv");
+//
+//    try {
+//        var lines = Files.readAllLines(csvPath);
+//        if (lines.size() > 1) {
+//            String dataLine = lines.get(1);
+//
+//            // Создаем клиента через перегруженный CSV-конструктор
+//            Client clientFromCsv = new Client(dataLine, ";");
+//
+//            System.out.println("\nКлиент успешно создан из CSV!");
+//            System.out.println("ID: " + clientFromCsv.getId_client());
+//            System.out.println("Имя: " + clientFromCsv.getFull_name());
+//            System.out.println("Телефон: " + clientFromCsv.getPhone());
+//            System.out.println("Дата рождения: " + clientFromCsv.getBirthday());
+//            System.out.println("Паспорт: " + clientFromCsv.getPassport());
+//            System.out.println("Комментарий: " + clientFromCsv.getComment());
+//        } else {
+//            System.err.println("Файл CSV пуст или содержит только заголовок");
+//        }
+//
+//    } catch (IOException e) {
+//        System.err.println("Ошибка чтения CSV файла: " + e.getMessage());
+//    } catch (IllegalArgumentException e) {
+//        System.err.println("Ошибка валидации данных из CSV: " + e.getMessage());
+//    }
 
-    } catch (IOException e) {
-        System.err.println("Ошибка чтения файла (проверьте путь и имя файла): " + e.getMessage());
-    } catch (IllegalArgumentException e) {
-        System.err.println("Ошибка валидации данных из файла: " + e.getMessage());
-    }
-    //csv
-    Path csvPath = Path.of("client.csv");
 
-    try {
-        var lines = Files.readAllLines(csvPath);
-        if (lines.size() > 1) {
-            String dataLine = lines.get(1);
+    //Сравнение двух классов
+    Client client1 = new Client(
+            1, "Иванов Иван Иванович", "+79991112233", "M",
+            LocalDate.parse("1995-05-10"), "1234 567890", "VIP"
+    );
 
-            // Создаем клиента через перегруженный CSV-конструктор
-            Client clientFromCsv = new Client(dataLine, ";");
+    Client client2 = new Client(
+            1, "Иванов Иван Иванович", "+79991112233", "M",
+            LocalDate.parse("1995-05-10"), "1234 567890", "Другой коммент"
+    );
 
-            System.out.println("\nКлиент успешно создан из CSV!");
-            System.out.println("ID: " + clientFromCsv.getId_client());
-            System.out.println("Имя: " + clientFromCsv.getFull_name());
-            System.out.println("Телефон: " + clientFromCsv.getPhone());
-            System.out.println("Дата рождения: " + clientFromCsv.getBirthday());
-            System.out.println("Паспорт: " + clientFromCsv.getPassport());
-            System.out.println("Комментарий: " + clientFromCsv.getComment());
-        } else {
-            System.err.println("Файл CSV пуст или содержит только заголовок");
-        }
+    Client client3 = new Client(
+            2, "Петров Петр Петрович", "+79998887766", "M",
+            LocalDate.parse("1990-12-01"), "9876 543210", null
+    );
 
-    } catch (IOException e) {
-        System.err.println("Ошибка чтения CSV файла: " + e.getMessage());
-    } catch (IllegalArgumentException e) {
-        System.err.println("Ошибка валидации данных из CSV: " + e.getMessage());
-    }
+    System.out.println("\nПОЛНЫЙ ВЫВОД");
+    System.out.println(client1.toString());
+
+    // 2. Демонстрация краткой версии
+    System.out.println("\nКРАТКИЙ ВЫВОД");
+    System.out.println(client1.toShortString());
+    System.out.println(client3.toShortString());
+
+    // 3. Демонстрация сравнения
+    System.out.println("\nСРАВНЕНИЕ");
+    System.out.println("client1 равен client2? " + client1.equals(client2));
+    System.out.println("client1 равен client3? " + client1.equals(client3));
 }
