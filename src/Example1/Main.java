@@ -172,6 +172,7 @@ class Client {
                 "\n Паспорт = "+ passport +
                 "\n Комметарий " + comment+ " ";
     }
+
     public String toShortString() {
         return String.format("Client [ID: %d | %s | Тел: %s]",
                 id_client, getShortName(), phone);
@@ -203,7 +204,44 @@ class Client {
 
 }
 
-class Short extends Client{
+class ShortClient extends Client {
+
+    public ShortClient(Client source) {
+        this(
+                source.getId_client(),
+                source.getFull_name(),
+                source.getPhone(),
+                source.getGender(),
+                source.getBirthday(),
+                source.getPassport(),
+                source.getComment()
+        );
+    }
+    public ShortClient(String line, String delimiter) {
+        super(line, delimiter);
+    }
+    public ShortClient(String json) {
+        super(json);
+    }
+    public ShortClient(int id, String fullName, String phone, String gender,
+                       LocalDate birthday, String passport, String comment) {
+        super(id, fullName, phone, gender, birthday, passport, comment);
+    }
+    public String getInitials() {
+        String[] parts = full_name.trim().split("\\s+");
+        if (parts.length == 1) return parts[0];
+        StringBuilder sb = new StringBuilder(parts[0]);
+        for (int i = 1; i < parts.length; i++) {
+            sb.append(' ').append(parts[i].charAt(0)).append('.');
+        }
+        return sb.toString();
+    }
+
+    @Override
+    public String toShortString() {
+        return String.format("ShortClient [ID: %d | %s | Тел: %s]",
+                id_client, getInitials(), phone);
+    }
 
 }
 
@@ -281,4 +319,14 @@ void main() {
     System.out.println("\nСРАВНЕНИЕ");
     System.out.println("client1 равен client2? " + client1.equals(client2));
     System.out.println("client1 равен client3? " + client1.equals(client3));
+
+    System.out.println("\nКРАТКАЯ ВЕРСИЯ (ShortClient)");
+    ShortClient short1 = new ShortClient(client1);
+    ShortClient short3 = new ShortClient(client3);
+
+    System.out.println(short1.toShortString());
+    System.out.println(short3.toShortString());
+    System.out.println("Инициалы: " + short1.getInitials());
+
+    System.out.println("short1 equals short3? " + short1.equals(short3));
 }
