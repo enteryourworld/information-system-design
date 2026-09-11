@@ -310,12 +310,11 @@ void main() {
     System.out.println("\nПОЛНЫЙ ВЫВОД");
     System.out.println(client1.toString());
 
-    // 2. Демонстрация краткой версии
     System.out.println("\nКРАТКИЙ ВЫВОД");
     System.out.println(client1.toShortString());
     System.out.println(client3.toShortString());
 
-    // 3. Демонстрация сравнения
+
     System.out.println("\nСРАВНЕНИЕ");
     System.out.println("client1 равен client2? " + client1.equals(client2));
     System.out.println("client1 равен client3? " + client1.equals(client3));
