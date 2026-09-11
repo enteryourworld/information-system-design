@@ -11,13 +11,13 @@ class Client {
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[1-9][0-9]{7,14}$");
     private static final Pattern PASSPORT_PATTERN = Pattern.compile("^(\\d{4})\\s?(\\d{6})$");
 
-    private final int id_client;
-    private String full_name;
-    private String phone;
-    private final String gender;
-    private final LocalDate birthday;
+    protected final int id_client;
+    protected String full_name;
+    protected String phone;
+    protected final String gender;
+    protected final LocalDate birthday;
     private String passport;
-    private String comment;
+    protected String comment;
 
     public Client(int id_client, String full_name, String phone, String gender, LocalDate birthday, String passport, String comment) {
         this.id_client = validateId(id_client);
@@ -200,6 +200,10 @@ class Client {
         return Objects.hash(id_client, passport);
     }
 
+
+}
+
+class Short extends Client{
 
 }
 
