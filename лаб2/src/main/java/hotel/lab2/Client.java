@@ -46,6 +46,11 @@ public record Client(long id, String lastName, String firstName, String patronym
         return new Client(newId, lastName, firstName, patronymic, phone, birthday, passport, comment);
     }
 
+    public ClientShort toShort() {
+        return new ClientShort(id, lastName + " " + firstName.charAt(0) + "." + patronymic.charAt(0) + ".",
+                phone);
+    }
+
     public boolean isSameClient(Client other) {
         return other != null && passport.equals(other.passport);
     }

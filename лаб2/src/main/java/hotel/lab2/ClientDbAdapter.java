@@ -1,48 +1,37 @@
 package hotel.lab2;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 public final class ClientDbAdapter implements ClientRepository {
-    private final ClientRepDb adaptee;
-
-    public ClientDbAdapter(ClientRepDb adaptee) {
-        this.adaptee = Objects.requireNonNull(adaptee, "adaptee");
-    }
+    private final ClientRepDb database = ClientRepDb.getInstance();
 
     @Override
     public Optional<Client> getById(long id) {
-        return adaptee.findById(id);
+        return database.findById(id);
     }
     @Override
     public List<ClientShort> getKNShortList(int k, int n) {
-        return adaptee.fetchPage(k, n);
+        return database.fetchPage(k, n);
     }
     @Override
     public void sortByLastName() {
-        adaptee.sortByLastName();
+        database.sortByLastName();
     }
     @Override
     public Client add(Client client) {
-        return adaptee.insert(client);
+        return database.insert(client);
     }
     @Override
     public boolean replace(long id, Client client) {
-        return adaptee.update(id, client);
+        return database.update(id, client);
     }
     @Override
     public boolean delete(long id) {
-        return adaptee.remove(id);
+        return database.remove(id);
     }
     @Override
     public long getCount() {
-        return adaptee.count();
-    }
-    List<ClientShort> queryPage(int k, int n, ClientQuery query) {
-        return adaptee.fetchPage(k, n, query);
-    }
-    long queryCount(ClientQuery query) {
-        return adaptee.count(query);
+        return database.count();
     }
 }

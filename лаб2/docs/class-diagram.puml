@@ -20,14 +20,14 @@ class Client <<record>> {
   + Client(lastName: String, firstName: String, patronymic: String, phone: String, birthday: LocalDate, passport: String, comment: String)
   - {static} validName(value: String): String
   + withId(newId: long): Client
+  + toShort(): ClientShort
   + isSameClient(other: Client): boolean
   + equals(other: Object): boolean
   + hashCode(): int
 }
 
 class ClientDbAdapter <<Adapter>> {
-  - adaptee: ClientRepDb
-  + ClientDbAdapter(adaptee: ClientRepDb)
+  - database: ClientRepDb
   + getById(id: long): Optional<Client>
   + getKNShortList(k: int, n: int): List<ClientShort>
   + sortByLastName(): void
@@ -35,65 +35,33 @@ class ClientDbAdapter <<Adapter>> {
   + replace(id: long, client: Client): boolean
   + delete(id: long): boolean
   + getCount(): long
-  ~ queryPage(k: int, n: int, query: ClientQuery): List<ClientShort>
-  ~ queryCount(query: ClientQuery): long
 }
 
-class ClientDocument <<record>> {
-  - nextId: long {readOnly}
-  - clients: List<Client> {readOnly}
-  + ClientDocument(nextId: long, clients: List<Client>)
-}
-
-class ClientFileCodec {
-  - mapper: ObjectMapper
-  - ClientFileCodec(mapper: ObjectMapper)
-  + {static} json(): ClientFileCodec
-  + {static} yaml(): ClientFileCodec
-  + read(path: Path): ClientDocument
-  + write(path: Path, document: ClientDocument): void
-}
-
-class ClientFilter <<record>> {
-  - lastNamePrefix: String {readOnly}
-  - phoneContains: String {readOnly}
-  - commentContains: String {readOnly}
-  + ClientFilter(lastNamePrefix: String, phoneContains: String, commentContains: String)
-  + {static} all(): ClientFilter
-  - {static} normalize(text: String): String
-  + matches(client: Client): boolean
-}
-
-class ClientQuery <<record>> {
-  - filter: ClientFilter {readOnly}
-  - sort: ClientSort {readOnly}
-  - direction: SortDirection {readOnly}
-  + ClientQuery(filter: ClientFilter, sort: ClientSort, direction: SortDirection)
-  + {static} all(): ClientQuery
-  + comparator(): Comparator<Client>
-}
-
-class ClientRepDb {
-  - database: Database
+class ClientRepDb <<Singleton>> {
+  - {static} INSTANCE: ClientRepDb
   - sortedByLastName: boolean
-  + ClientRepDb()
+  - ClientRepDb()
+  + {static} getInstance(): ClientRepDb
+  - connect(): Connection
   + initializeSchema(): void
   + findById(id: long): Optional<Client>
   + fetchPage(k: int, n: int): List<ClientShort>
-  + fetchPage(k: int, n: int, query: ClientQuery): List<ClientShort>
   + sortByLastName(): void
   + insert(client: Client): Client
   + update(id: long, client: Client): boolean
   + remove(id: long): boolean
   + count(): long
-  + count(query: ClientQuery): long
   - {static} bindClient(statement: PreparedStatement, client: Client): void
   - {static} readClient(rows: ResultSet): Client
 }
 
 class ClientRepJson {
-  - delegate: FileClientRepository
+  - path: Path
+  - mapper: ObjectMapper
+  - clients: List<Client>
+  - nextId: long
   + ClientRepJson(path: Path)
+  ~ ClientRepJson(path: Path, mapper: ObjectMapper)
   + readAll(): List<Client>
   + writeAll(): void
   + getById(id: long): Optional<Client>
@@ -103,11 +71,12 @@ class ClientRepJson {
   + replace(id: long, client: Client): boolean
   + delete(id: long): boolean
   + getCount(): long
-  + snapshot(): List<Client>
+  - checkPassport(passport: String, excludedId: long): void
+  + {static} main(args: String[]): void
 }
 
 class ClientRepYaml {
-  - delegate: FileClientRepository
+  - delegate: ClientRepJson
   + ClientRepYaml(path: Path)
   + readAll(): List<Client>
   + writeAll(): void
@@ -118,7 +87,6 @@ class ClientRepYaml {
   + replace(id: long, client: Client): boolean
   + delete(id: long): boolean
   + getCount(): long
-  + snapshot(): List<Client>
 }
 
 interface ClientRepository {
@@ -138,152 +106,12 @@ class ClientShort <<record>> {
   + ClientShort(id: long, name: String, phone: String)
 }
 
-enum ClientSort {
-  ID
-  LAST_NAME
-  BIRTHDAY
-  + comparator(): Comparator<Client>
-  + sqlColumn(): String
-}
-
-class Database <<Singleton>> {
-  - url: String
-  - user: String
-  - password: String
-  - Database()
-  + {static} getInstance(): Database
-  + withConnection(work: SqlWork<T>): T
-}
-
-class DatabaseQueryDecorator <<Decorator>> {
-  - delegate: ClientDbAdapter
-  + DatabaseQueryDecorator(delegate: ClientDbAdapter)
-  + delegate(): ClientDbAdapter
-  + getKNShortList(k: int, n: int, query: ClientQuery): List<ClientShort>
-  + getCount(query: ClientQuery): long
-}
-
-class FileClientRepository {
-  - path: Path
-  - codec: ClientFileCodec
-  - clients: List<Client>
-  - nextId: long
-  + FileClientRepository(path: Path, codec: ClientFileCodec)
-  + readAll(): List<Client>
-  + writeAll(): void
-  + getById(id: long): Optional<Client>
-  + getKNShortList(k: int, n: int): List<ClientShort>
-  + sortByLastName(): void
-  + add(client: Client): Client
-  + replace(id: long, client: Client): boolean
-  + delete(id: long): boolean
-  + getCount(): long
-  - checkPassport(passport: String, excludedId: long): void
-  + snapshot(): List<Client>
-}
-
-class FileQueryDecorator <<Decorator>> {
-  - delegate: FileRepository
-  + FileQueryDecorator(delegate: FileRepository)
-  + delegate(): FileRepository
-  + readAll(): List<Client>
-  + writeAll(): void
-  + snapshot(): List<Client>
-  + getKNShortList(k: int, n: int, query: ClientQuery): List<ClientShort>
-  + getCount(query: ClientQuery): long
-}
-
-interface FileRepository {
-  + readAll(): List<Client>
-  + writeAll(): void
-  + snapshot(): List<Client>
-}
-
-class Main {
-  - Main()
-  + {static} main(args: String[]): void
-  - {static} demonstrate(label: String, repository: ClientRepository, queries: QueryableClientRepository): void
-}
-
-class Mapper {
-  - Mapper()
-  + {static} toShortClient(client: Client): ClientShort
-}
-
-interface QueryableClientRepository {
-  + getKNShortList(k: int, n: int, query: ClientQuery): List<ClientShort>
-  + getCount(query: ClientQuery): long
-}
-
-interface RepositoryDecorator {
-  + delegate(): ClientRepository
-  + getById(id: long): Optional<Client>
-  + getKNShortList(k: int, n: int): List<ClientShort>
-  + sortByLastName(): void
-  + add(client: Client): Client
-  + replace(id: long, client: Client): boolean
-  + delete(id: long): boolean
-  + getCount(): long
-}
-
-class RepositoryException {
-  - {static} serialVersionUID: long
-  + RepositoryException(message: String, cause: Throwable)
-}
-
-enum SortDirection {
-  ASC
-  DESC
-}
-
-class SqlQuery <<record>> {
-  - where: String {readOnly}
-  - parameters: List<String> {readOnly}
-  - orderBy: String {readOnly}
-  + SqlQuery(where: String, parameters: List<String>, orderBy: String)
-  + {static} from(query: ClientQuery): SqlQuery
-  - {static} add(clauses: List<String>, parameters: List<String>, column: String, value: String, prefix: boolean): void
-  + bind(statement: PreparedStatement): int
-}
-
-FileRepository --|> ClientRepository
-ClientRepJson ..|> FileRepository
-ClientRepYaml ..|> FileRepository
-FileClientRepository ..|> FileRepository
-ClientRepJson --> FileClientRepository : делегирует
-ClientRepYaml --> FileClientRepository : делегирует
-FileClientRepository --> ClientFileCodec : формат
-ClientFileCodec ..> ClientDocument : кодирует
-ClientDocument --> Client : clients
+ClientRepJson ..|> ClientRepository
+ClientRepYaml ..|> ClientRepository
+ClientRepYaml --> ClientRepJson : делегирует / YAML
+Client ..> ClientShort : toShort
 ClientRepository ..> Client : CRUD
 ClientRepository ..> ClientShort : страницы
-Mapper ..> Client
-Mapper ..> ClientShort : создаёт
-ClientRepDb --> Database : делегирует SQL
 ClientDbAdapter ..|> ClientRepository
 ClientDbAdapter --> ClientRepDb : Adapter
-QueryableClientRepository --|> ClientRepository
-RepositoryDecorator --|> ClientRepository
-DatabaseQueryDecorator ..|> RepositoryDecorator
-DatabaseQueryDecorator ..|> QueryableClientRepository
-DatabaseQueryDecorator --> ClientDbAdapter : оборачивает
-FileQueryDecorator ..|> RepositoryDecorator
-FileQueryDecorator ..|> QueryableClientRepository
-FileQueryDecorator --> FileRepository : оборачивает
-ClientQuery --> ClientFilter
-ClientQuery --> ClientSort
-ClientQuery --> SortDirection
-SqlQuery ..> ClientQuery : параметры
-ClientRepDb ..> SqlQuery
-DatabaseQueryDecorator ..> ClientQuery
-FileQueryDecorator ..> ClientQuery
-Database ..> RepositoryException : ошибки
-FileClientRepository ..> RepositoryException : ошибки
-Main ..> ClientRepository
-Main ..> ClientRepJson
-Main ..> ClientRepYaml
-interface "Database.SqlWork<T>" as SqlWork {
-  + execute(connection: Connection): T
-}
-Database ..> SqlWork : выполняет callback
 @enduml

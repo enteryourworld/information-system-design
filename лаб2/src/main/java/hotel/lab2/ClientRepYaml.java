@@ -1,21 +1,21 @@
 package hotel.lab2;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-public final class ClientRepYaml implements FileRepository {
-    private final FileClientRepository delegate;
+public final class ClientRepYaml implements ClientRepository {
+    private final ClientRepJson delegate;
 
     public ClientRepYaml(Path path) {
-        delegate = new FileClientRepository(path, ClientFileCodec.yaml());
+        delegate = new ClientRepJson(path, new ObjectMapper(new YAMLFactory()));
     }
 
-    @Override
     public List<Client> readAll() {
         return delegate.readAll();
     }
-    @Override
     public void writeAll() {
         delegate.writeAll();
     }
@@ -46,9 +46,5 @@ public final class ClientRepYaml implements FileRepository {
     @Override
     public long getCount() {
         return delegate.getCount();
-    }
-    @Override
-    public List<Client> snapshot() {
-        return delegate.snapshot();
     }
 }
