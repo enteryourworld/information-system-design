@@ -27,7 +27,7 @@ class Client <<record>> {
 }
 
 class ClientDbAdapter <<Adapter>> {
-  - database: ClientRepDb
+  - repository: ClientRepDb
   + getById(id: long): Optional<Client>
   + getKNShortList(k: int, n: int): List<ClientShort>
   + sortByLastName(): void
@@ -37,12 +37,9 @@ class ClientDbAdapter <<Adapter>> {
   + getCount(): long
 }
 
-class ClientRepDb <<Singleton>> {
-  - {static} INSTANCE: ClientRepDb
+class ClientRepDb {
+  - database: Database
   - sortedByLastName: boolean
-  - ClientRepDb()
-  + {static} getInstance(): ClientRepDb
-  - connect(): Connection
   + initializeSchema(): void
   + findById(id: long): Optional<Client>
   + fetchPage(k: int, n: int): List<ClientShort>
@@ -106,12 +103,20 @@ class ClientShort <<record>> {
   + ClientShort(id: long, name: String, phone: String)
 }
 
+class Database <<Singleton>> {
+  - {static} INSTANCE: Database
+  - Database()
+  + {static} getInstance(): Database
+  + connect(): Connection
+}
+
 ClientRepJson ..|> ClientRepository
 ClientRepYaml ..|> ClientRepository
 ClientRepYaml --> ClientRepJson : делегирует / YAML
 Client ..> ClientShort : toShort
 ClientRepository ..> Client : CRUD
 ClientRepository ..> ClientShort : страницы
+ClientRepDb --> Database : делегирует подключение
 ClientDbAdapter ..|> ClientRepository
 ClientDbAdapter --> ClientRepDb : Adapter
 @enduml

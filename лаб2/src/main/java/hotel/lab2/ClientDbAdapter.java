@@ -4,34 +4,34 @@ import java.util.List;
 import java.util.Optional;
 
 public final class ClientDbAdapter implements ClientRepository {
-    private final ClientRepDb database = ClientRepDb.getInstance();
+    private final ClientRepDb repository = new ClientRepDb();
 
     @Override
     public Optional<Client> getById(long id) {
-        return database.findById(id);
+        return repository.findById(id);
     }
     @Override
     public List<ClientShort> getKNShortList(int k, int n) {
-        return database.fetchPage(k, n);
+        return repository.fetchPage(k, n);
     }
     @Override
     public void sortByLastName() {
-        database.sortByLastName();
+        repository.sortByLastName();
     }
     @Override
     public Client add(Client client) {
-        return database.insert(client);
+        return repository.insert(client);
     }
     @Override
     public boolean replace(long id, Client client) {
-        return database.update(id, client);
+        return repository.update(id, client);
     }
     @Override
     public boolean delete(long id) {
-        return database.remove(id);
+        return repository.remove(id);
     }
     @Override
     public long getCount() {
-        return database.count();
+        return repository.count();
     }
 }

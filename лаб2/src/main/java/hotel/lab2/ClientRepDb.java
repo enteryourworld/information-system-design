@@ -1,7 +1,6 @@
 package hotel.lab2;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -11,21 +10,8 @@ import java.util.List;
 import java.util.Optional;
 
 public final class ClientRepDb {
-    private static final ClientRepDb INSTANCE = new ClientRepDb();
+    private final Database database = Database.getInstance();
     private boolean sortedByLastName;
-
-    private ClientRepDb() {
-    }
-    public static ClientRepDb getInstance() {
-        return INSTANCE;
-    }
-
-    private Connection connect() throws SQLException {
-        return DriverManager.getConnection(
-                System.getenv().getOrDefault("LAB2_DB_URL", "jdbc:postgresql://localhost:5432/hotel_lab2"),
-                System.getenv().getOrDefault("LAB2_DB_USER", "postgres"),
-                System.getenv().getOrDefault("LAB2_DB_PASSWORD", ""));
-    }
 
     public void initializeSchema() {
         String sql = """
@@ -36,7 +22,7 @@ public final class ClientRepDb {
                     birthday DATE NOT NULL, passport VARCHAR(10) NOT NULL UNIQUE,
                     comment VARCHAR(1000))
                 """;
-        try (Connection connection = connect();
+        try (Connection connection = database.connect();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             statement.execute();
         } catch (SQLException exception) {
@@ -45,7 +31,7 @@ public final class ClientRepDb {
     }
 
     public Optional<Client> findById(long id) {
-        try (Connection connection = connect();
+        try (Connection connection = database.connect();
                 PreparedStatement statement = connection
                         .prepareStatement("SELECT * FROM lab2_clients WHERE id = ?")) {
             statement.setLong(1, id);
@@ -61,7 +47,7 @@ public final class ClientRepDb {
         if (k < 1 || n < 1)
             throw new IllegalArgumentException("k и n должны быть положительными");
         String order = sortedByLastName ? "last_name, id" : "id";
-        try (Connection connection = connect();
+        try (Connection connection = database.connect();
                 PreparedStatement statement = connection.prepareStatement(
                         "SELECT * FROM lab2_clients ORDER BY " + order + " LIMIT ? OFFSET ?")) {
             statement.setInt(1, n);
@@ -86,7 +72,7 @@ public final class ClientRepDb {
                 INSERT INTO lab2_clients (last_name, first_name, patronymic, phone, birthday, passport, comment)
                 VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id
                 """;
-        try (Connection connection = connect();
+        try (Connection connection = database.connect();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             bindClient(statement, client);
             try (ResultSet rows = statement.executeQuery()) {
@@ -103,7 +89,7 @@ public final class ClientRepDb {
                 UPDATE lab2_clients SET last_name = ?, first_name = ?, patronymic = ?, phone = ?,
                     birthday = ?, passport = ?, comment = ? WHERE id = ?
                 """;
-        try (Connection connection = connect();
+        try (Connection connection = database.connect();
                 PreparedStatement statement = connection.prepareStatement(sql)) {
             bindClient(statement, client);
             statement.setLong(8, id);
@@ -114,7 +100,7 @@ public final class ClientRepDb {
     }
 
     public boolean remove(long id) {
-        try (Connection connection = connect();
+        try (Connection connection = database.connect();
                 PreparedStatement statement = connection
                         .prepareStatement("DELETE FROM lab2_clients WHERE id = ?")) {
             statement.setLong(1, id);
@@ -125,7 +111,7 @@ public final class ClientRepDb {
     }
 
     public long count() {
-        try (Connection connection = connect();
+        try (Connection connection = database.connect();
                 PreparedStatement statement = connection
                         .prepareStatement("SELECT COUNT(*) FROM lab2_clients");
                 ResultSet rows = statement.executeQuery()) {
