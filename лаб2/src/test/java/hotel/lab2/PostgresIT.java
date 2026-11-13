@@ -71,4 +71,22 @@ class PostgresIT {
         assertTrue(adapter.delete(first.id()));
         assertEquals(0, adapter.getCount());
     }
+    @Test void databaseDecoratorFiltersBeforePaginationAndCountsTheSameSelection() {
+        var decorator = new DatabaseQueryDecorator(new ClientDbAdapter(repository));
+        Client first = decorator.add(new Client("Иванов", "Иван", "Иванович", "+79991234567",
+                java.time.LocalDate.of(1995, 5, 10), "1234567890", "100% VIP_гость"));
+        Client second = decorator.add(ClientRepJsonTest.client("Ивлев", "1234567891"));
+        decorator.add(ClientRepJsonTest.client("Петров", "1234567892"));
+        ClientQuery query = new ClientQuery(new ClientFilter("ИВ", null, null), ClientSort.LAST_NAME, SortDirection.DESC);
+        assertEquals(2, decorator.getCount(query));
+        assertEquals(second.id(), decorator.getKNShortList(1, 1, query).get(0).id());
+        assertEquals(first.id(), decorator.getKNShortList(2, 1, query).get(0).id());
+        ClientQuery literalPercent = new ClientQuery(new ClientFilter(null, null, "%"), ClientSort.ID, SortDirection.ASC);
+        assertEquals(1, decorator.getCount(literalPercent));
+        assertEquals(first.id(), decorator.getKNShortList(1, 20, literalPercent).get(0).id());
+        ClientQuery injection = new ClientQuery(new ClientFilter("%' OR 1=1 --", null, null), ClientSort.ID, SortDirection.ASC);
+        assertEquals(0, decorator.getCount(injection));
+        assertEquals(3, decorator.getCount());
+        assertTrue(decorator.delete(first.id()));
+    }
 }

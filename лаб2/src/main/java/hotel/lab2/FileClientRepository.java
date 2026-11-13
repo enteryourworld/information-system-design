@@ -82,7 +82,7 @@ public final class FileClientRepository implements FileRepository {
     }
 
     public void sortByLastName() {
-        clients.sort(Comparator.comparing(Client::lastName).thenComparing(Client::firstName).thenComparingLong(Client::id));
+        clients.sort(Comparator.comparing(Client::lastName).thenComparingLong(Client::id));
     }
 
     public Client add(Client client) {

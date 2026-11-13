@@ -44,6 +44,23 @@ class ClientFileCodec {
   + write(path: Path, document: ClientDocument): void
 }
 
+class ClientFilter <<record>> {
+  - lastNamePrefix: String {readOnly}
+  - phoneContains: String {readOnly}
+  - commentContains: String {readOnly}
+  + {static} all(): ClientFilter
+  - {static} normalize(text: String): String
+  + matches(client: Client): boolean
+}
+
+class ClientQuery <<record>> {
+  - filter: ClientFilter {readOnly}
+  - sort: ClientSort {readOnly}
+  - direction: SortDirection {readOnly}
+  + {static} all(): ClientQuery
+  + comparator(): Comparator<Client>
+}
+
 class ClientRepDb {
   - database: Database
   - sortedByLastName: boolean
@@ -51,14 +68,15 @@ class ClientRepDb {
   + initializeSchema(): void
   + findById(id: long): Optional<Client>
   + fetchPage(k: int, n: int): List<ClientShort>
+  + fetchPage(k: int, n: int, query: ClientQuery): List<ClientShort>
   + sortByLastName(): void
-  - orderBy(): String
   + insert(client: Client): Client
   + bindClient()
   + update(id: long, client: Client): boolean
   + bindClient()
   + remove(id: long): boolean
   + count(): long
+  + count(query: ClientQuery): long
   - {static} bindClient(statement: PreparedStatement, client: Client): void
   - {static} readClient(rows: ResultSet): Client
 }
@@ -89,6 +107,11 @@ class ClientShort <<record>> {
   - phone: String {readOnly}
 }
 
+enum ClientSort {
+  + comparator(): Comparator<Client>
+  + sqlColumn(): String
+}
+
 class Database {
   - url: String
   - user: String
@@ -97,6 +120,11 @@ class Database {
   + {static} getInstance(): Database
   + withConnection(work: SqlWork<T>): T
   + execute(connection: Connection): T
+}
+
+class DatabaseQueryDecorator {
+  - delegate: ClientDbAdapter
+  + DatabaseQueryDecorator(delegate: ClientDbAdapter)
 }
 
 class FileClientRepository {
@@ -127,6 +155,27 @@ class Mapper {
   + {static} toShortClient(client: Client): ClientShort
 }
 
+interface QueryableClientRepository {
+  + getKNShortList(k: int, n: int, query: ClientQuery): List<ClientShort>
+  + getCount(query: ClientQuery): long
+}
+
+interface RepositoryDecorator {
+  + delegate(): ClientRepository
+}
+
+enum SortDirection {
+}
+
+class SqlQuery <<record>> {
+  - where: String {readOnly}
+  - parameters: List<String> {readOnly}
+  - orderBy: String {readOnly}
+  + {static} from(query: ClientQuery): SqlQuery
+  - {static} add(clauses: List<String>, parameters: List<String>, column: String, value: String, prefix: boolean): void
+  + bind(statement: PreparedStatement): int
+}
+
 FileRepository --|> ClientRepository
 ClientRepJson ..|> FileRepository
 ClientRepYaml ..|> FileRepository
@@ -143,4 +192,16 @@ Mapper ..> ClientShort : создаёт
 ClientRepDb --> Database : делегирует SQL
 ClientDbAdapter ..|> ClientRepository
 ClientDbAdapter --> ClientRepDb : Adapter
+QueryableClientRepository --|> ClientRepository
+RepositoryDecorator --|> ClientRepository
+DatabaseQueryDecorator ..|> RepositoryDecorator
+DatabaseQueryDecorator ..|> QueryableClientRepository
+DatabaseQueryDecorator --> ClientDbAdapter : оборачивает
+ClientDbAdapter ..|> QueryableClientRepository
+ClientQuery --> ClientFilter
+ClientQuery --> ClientSort
+ClientQuery --> SortDirection
+SqlQuery ..> ClientQuery : параметры
+ClientRepDb ..> SqlQuery
+DatabaseQueryDecorator ..> ClientQuery
 @enduml

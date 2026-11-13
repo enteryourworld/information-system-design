@@ -51,27 +51,29 @@ public final class ClientRepDb {
     }
 
     public List<ClientShort> fetchPage(int k, int n) {
+        return fetchPage(k, n, new ClientQuery(ClientFilter.all(), sortedByLastName ? ClientSort.LAST_NAME : ClientSort.ID, SortDirection.ASC));
+    }
+
+    public List<ClientShort> fetchPage(int k, int n, ClientQuery query) {
         if (k < 1 || n < 1) throw new IllegalArgumentException("k и n должны быть положительными");
-        String sql = "SELECT * FROM lab2_clients ORDER BY " + orderBy() + " LIMIT ? OFFSET ?";
+        SqlQuery plan = SqlQuery.from(Objects.requireNonNull(query, "query"));
+        String sql = "SELECT * FROM lab2_clients" + plan.where() + " ORDER BY " + plan.orderBy() + " LIMIT ? OFFSET ?";
         return database.withConnection(connection -> {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.setInt(1, n);
-            statement.setLong(2, (long) (k - 1) * n);
-            List<ClientShort> result = new ArrayList<>();
-            try (ResultSet rows = statement.executeQuery()) {
-                while (rows.next()) result.add(Mapper.toShortClient(readClient(rows)));
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                int index = plan.bind(statement);
+                statement.setInt(index++, n);
+                statement.setLong(index, (long) (k - 1) * n);
+                List<ClientShort> result = new ArrayList<>();
+                try (ResultSet rows = statement.executeQuery()) {
+                    while (rows.next()) result.add(Mapper.toShortClient(readClient(rows)));
+                }
+                return List.copyOf(result);
             }
-            return List.copyOf(result);
-        }
         });
     }
 
     public void sortByLastName() {
         sortedByLastName = true;
-    }
-
-    private String orderBy() {
-        return sortedByLastName ? "last_name COLLATE \"C\", first_name COLLATE \"C\", id" : "id";
     }
 
     public Client insert(Client client) {
@@ -116,11 +118,19 @@ public final class ClientRepDb {
     }
 
     public long count() {
+        return count(ClientQuery.all());
+    }
+
+    public long count(ClientQuery query) {
+        SqlQuery plan = SqlQuery.from(Objects.requireNonNull(query, "query"));
         return database.withConnection(connection -> {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM lab2_clients"); ResultSet rows = statement.executeQuery()) {
-            rows.next();
-            return rows.getLong(1);
-        }
+            try (PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM lab2_clients" + plan.where())) {
+                plan.bind(statement);
+                try (ResultSet rows = statement.executeQuery()) {
+                    rows.next();
+                    return rows.getLong(1);
+                }
+            }
         });
     }
 
