@@ -25,6 +25,11 @@ class Client <<record>> {
   + hashCode(): int
 }
 
+class ClientDbAdapter {
+  - adaptee: ClientRepDb
+  + ClientDbAdapter(adaptee: ClientRepDb)
+}
+
 class ClientDocument <<record>> {
   - nextId: long {readOnly}
   - clients: List<Client> {readOnly}
@@ -136,4 +141,6 @@ ClientRepository ..> ClientShort : страницы
 Mapper ..> Client
 Mapper ..> ClientShort : создаёт
 ClientRepDb --> Database : делегирует SQL
+ClientDbAdapter ..|> ClientRepository
+ClientDbAdapter --> ClientRepDb : Adapter
 @enduml

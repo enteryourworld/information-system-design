@@ -58,4 +58,17 @@ class PostgresIT {
         }));
         assertTrue(captured.get().isClosed());
     }
+    @Test void adapterSupportsTheCommonRepositoryContract() {
+        ClientRepository adapter = new ClientDbAdapter(repository);
+        assertEquals(Object.class, ClientDbAdapter.class.getSuperclass());
+        Client first = adapter.add(ClientRepJsonTest.client("Иванов", "1234567890"));
+        assertEquals(first.id(), adapter.getById(first.id()).orElseThrow().id());
+        assertEquals(1, adapter.getCount());
+        assertEquals(first.id(), adapter.getKNShortList(1, 10).get(0).id());
+        assertTrue(adapter.replace(first.id(), ClientRepJsonTest.client("Петров", "1234567890")));
+        adapter.sortByLastName();
+        assertEquals("Петров И.И.", adapter.getKNShortList(1, 10).get(0).name());
+        assertTrue(adapter.delete(first.id()));
+        assertEquals(0, adapter.getCount());
+    }
 }
