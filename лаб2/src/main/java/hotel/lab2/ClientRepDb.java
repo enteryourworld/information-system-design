@@ -1,6 +1,5 @@
 package hotel.lab2;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -32,32 +31,36 @@ public final class ClientRepDb {
                 )
                 """;
         database.withConnection(connection -> {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            statement.execute();
-            return null;
-        }
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                statement.execute();
+                return null;
+            }
         });
     }
 
     public Optional<Client> findById(long id) {
         return database.withConnection(connection -> {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM lab2_clients WHERE id = ?")) {
-            statement.setLong(1, id);
-            try (ResultSet rows = statement.executeQuery()) {
-                return rows.next() ? Optional.of(readClient(rows)) : Optional.empty();
+            try (PreparedStatement statement = connection
+                    .prepareStatement("SELECT * FROM lab2_clients WHERE id = ?")) {
+                statement.setLong(1, id);
+                try (ResultSet rows = statement.executeQuery()) {
+                    return rows.next() ? Optional.of(readClient(rows)) : Optional.empty();
+                }
             }
-        }
         });
     }
 
     public List<ClientShort> fetchPage(int k, int n) {
-        return fetchPage(k, n, new ClientQuery(ClientFilter.all(), sortedByLastName ? ClientSort.LAST_NAME : ClientSort.ID, SortDirection.ASC));
+        return fetchPage(k, n, new ClientQuery(ClientFilter.all(),
+                sortedByLastName ? ClientSort.LAST_NAME : ClientSort.ID, SortDirection.ASC));
     }
 
     public List<ClientShort> fetchPage(int k, int n, ClientQuery query) {
-        if (k < 1 || n < 1) throw new IllegalArgumentException("k и n должны быть положительными");
+        if (k < 1 || n < 1)
+            throw new IllegalArgumentException("k и n должны быть положительными");
         SqlQuery plan = SqlQuery.from(Objects.requireNonNull(query, "query"));
-        String sql = "SELECT * FROM lab2_clients" + plan.where() + " ORDER BY " + plan.orderBy() + " LIMIT ? OFFSET ?";
+        String sql = "SELECT * FROM lab2_clients" + plan.where() + " ORDER BY " + plan.orderBy()
+                + " LIMIT ? OFFSET ?";
         return database.withConnection(connection -> {
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 int index = plan.bind(statement);
@@ -65,7 +68,8 @@ public final class ClientRepDb {
                 statement.setLong(index, (long) (k - 1) * n);
                 List<ClientShort> result = new ArrayList<>();
                 try (ResultSet rows = statement.executeQuery()) {
-                    while (rows.next()) result.add(Mapper.toShortClient(readClient(rows)));
+                    while (rows.next())
+                        result.add(Mapper.toShortClient(readClient(rows)));
                 }
                 return List.copyOf(result);
             }
@@ -83,13 +87,14 @@ public final class ClientRepDb {
                 VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING *
                 """;
         return database.withConnection(connection -> {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            bindClient(statement, client);
-            try (ResultSet rows = statement.executeQuery()) {
-                if (!rows.next()) throw new SQLException("INSERT не вернул запись");
-                return readClient(rows);
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                bindClient(statement, client);
+                try (ResultSet rows = statement.executeQuery()) {
+                    if (!rows.next())
+                        throw new SQLException("INSERT не вернул запись");
+                    return readClient(rows);
+                }
             }
-        }
         });
     }
 
@@ -100,20 +105,21 @@ public final class ClientRepDb {
                     birthday = ?, passport = ?, comment = ? WHERE id = ?
                 """;
         return database.withConnection(connection -> {
-        try (PreparedStatement statement = connection.prepareStatement(sql)) {
-            bindClient(statement, client);
-            statement.setLong(8, id);
-            return statement.executeUpdate() == 1;
-        }
+            try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                bindClient(statement, client);
+                statement.setLong(8, id);
+                return statement.executeUpdate() == 1;
+            }
         });
     }
 
     public boolean remove(long id) {
         return database.withConnection(connection -> {
-        try (PreparedStatement statement = connection.prepareStatement("DELETE FROM lab2_clients WHERE id = ?")) {
-            statement.setLong(1, id);
-            return statement.executeUpdate() == 1;
-        }
+            try (PreparedStatement statement = connection
+                    .prepareStatement("DELETE FROM lab2_clients WHERE id = ?")) {
+                statement.setLong(1, id);
+                return statement.executeUpdate() == 1;
+            }
         });
     }
 
@@ -124,7 +130,8 @@ public final class ClientRepDb {
     public long count(ClientQuery query) {
         SqlQuery plan = SqlQuery.from(Objects.requireNonNull(query, "query"));
         return database.withConnection(connection -> {
-            try (PreparedStatement statement = connection.prepareStatement("SELECT COUNT(*) FROM lab2_clients" + plan.where())) {
+            try (PreparedStatement statement = connection
+                    .prepareStatement("SELECT COUNT(*) FROM lab2_clients" + plan.where())) {
                 plan.bind(statement);
                 try (ResultSet rows = statement.executeQuery()) {
                     rows.next();
@@ -146,8 +153,9 @@ public final class ClientRepDb {
 
     private static Client readClient(ResultSet rows) throws SQLException {
         return new Client(rows.getLong("id"), rows.getString("last_name"), rows.getString("first_name"),
-                rows.getString("patronymic"), rows.getString("phone"), rows.getObject("birthday", LocalDate.class),
-                rows.getString("passport"), rows.getString("comment"));
+                rows.getString("patronymic"), rows.getString("phone"),
+                rows.getObject("birthday", LocalDate.class), rows.getString("passport"),
+                rows.getString("comment"));
     }
 
 }

@@ -8,8 +8,8 @@ public final class Mapper {
 
     public static ClientShort toShortClient(Client client) {
         Objects.requireNonNull(client, "client");
-        String name = client.lastName() + " " + client.firstName().charAt(0)
-                + "." + client.patronymic().charAt(0) + ".";
+        String name = client.lastName() + " " + client.firstName().charAt(0) + "."
+                + client.patronymic().charAt(0) + ".";
         return new ClientShort(client.id(), name, client.phone());
     }
 }

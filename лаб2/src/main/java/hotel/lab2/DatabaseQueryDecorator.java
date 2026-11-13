@@ -10,11 +10,16 @@ public final class DatabaseQueryDecorator implements RepositoryDecorator, Querya
         this.delegate = Objects.requireNonNull(delegate, "delegate");
     }
 
-    @Override public ClientDbAdapter delegate() { return delegate; }
-    @Override public List<ClientShort> getKNShortList(int k, int n, ClientQuery query) {
+    @Override
+    public ClientDbAdapter delegate() {
+        return delegate;
+    }
+    @Override
+    public List<ClientShort> getKNShortList(int k, int n, ClientQuery query) {
         return delegate.getKNShortList(k, n, query);
     }
-    @Override public long getCount(ClientQuery query) {
+    @Override
+    public long getCount(ClientQuery query) {
         return delegate.getCount(query);
     }
 }

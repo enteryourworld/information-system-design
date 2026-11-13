@@ -1,10 +1,13 @@
 package hotel.lab2;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 class QueryTest {
-    @Test void filtersAreCombinedAndNullCommentsDoNotMatch() {
+    @Test
+    void filtersAreCombinedAndNullCommentsDoNotMatch() {
         Client client = ClientRepJsonTest.client("Иванов", "1234567890");
         assertTrue(new ClientFilter("ив", "345", "ГОСТЬ").matches(client));
         assertFalse(new ClientFilter("пет", null, null).matches(client));
@@ -14,9 +17,11 @@ class QueryTest {
         assertTrue(ClientFilter.all().matches(noComment));
     }
 
-    @Test void sqlUsesBindingsAndEscapesWildcards() {
+    @Test
+    void sqlUsesBindingsAndEscapesWildcards() {
         String input = "%' OR 1=1 --_\\";
-        SqlQuery plan = SqlQuery.from(new ClientQuery(new ClientFilter(input, null, null), ClientSort.ID, SortDirection.DESC));
+        SqlQuery plan = SqlQuery.from(
+                new ClientQuery(new ClientFilter(input, null, null), ClientSort.ID, SortDirection.DESC));
         assertFalse(plan.where().contains(input));
         assertTrue(plan.where().contains("LIKE ?"));
         assertTrue(plan.parameters().get(0).contains("\\%"));

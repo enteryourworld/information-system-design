@@ -1,6 +1,9 @@
 package hotel.lab2;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDate;
@@ -8,13 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class ClientRepJsonTest {
-    @TempDir Path directory;
+    @TempDir
+    Path directory;
 
     static Client client(String lastName, String passport) {
-        return new Client(lastName, "Иван", "Иванович", "+79991234567", LocalDate.of(1995, 5, 10), passport, "Гость");
+        return new Client(lastName, "Иван", "Иванович", "+79991234567", LocalDate.of(1995, 5, 10), passport,
+                "Гость");
     }
 
-    @Test void crudPaginationAndPersistentIds() {
+    @Test
+    void crudPaginationAndPersistentIds() {
         Path file = directory.resolve("clients.json");
         ClientRepJson repo = new ClientRepJson(file);
         Client first = repo.add(client("Сидоров", "1234567890"));
@@ -37,7 +43,8 @@ class ClientRepJsonTest {
         assertFalse(loaded.delete(999));
     }
 
-    @Test void invalidFileDoesNotPartiallyReplaceMemory() throws Exception {
+    @Test
+    void invalidFileDoesNotPartiallyReplaceMemory() throws Exception {
         Path file = directory.resolve("clients.json");
         ClientRepJson repo = new ClientRepJson(file);
         Client value = repo.add(client("Иванов", "1234567890"));
@@ -47,7 +54,8 @@ class ClientRepJsonTest {
         assertEquals(value.id(), repo.getById(value.id()).orElseThrow().id());
     }
 
-    @Test void equalityRemainsPassportBasedAndViewsAreImmutable() {
+    @Test
+    void equalityRemainsPassportBasedAndViewsAreImmutable() {
         Client value = client("Иванов", "1234567890");
         assertEquals(value, value.withId(27));
         assertEquals(value.hashCode(), value.withId(27).hashCode());

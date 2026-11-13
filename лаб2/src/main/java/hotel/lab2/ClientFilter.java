@@ -18,9 +18,10 @@ public record ClientFilter(String lastNamePrefix, String phoneContains, String c
     }
 
     public boolean matches(Client client) {
-        return (lastNamePrefix == null || client.lastName().toLowerCase(Locale.ROOT).startsWith(lastNamePrefix))
+        return (lastNamePrefix == null
+                || client.lastName().toLowerCase(Locale.ROOT).startsWith(lastNamePrefix))
                 && (phoneContains == null || client.phone().toLowerCase(Locale.ROOT).contains(phoneContains))
                 && (commentContains == null || client.comment() != null
-                && client.comment().toLowerCase(Locale.ROOT).contains(commentContains));
+                        && client.comment().toLowerCase(Locale.ROOT).contains(commentContains));
     }
 }

@@ -16,7 +16,8 @@ public record ClientQuery(ClientFilter filter, ClientSort sort, SortDirection di
 
     public Comparator<Client> comparator() {
         Comparator<Client> comparator = sort.comparator();
-        if (direction == SortDirection.DESC) comparator = comparator.reversed();
+        if (direction == SortDirection.DESC)
+            comparator = comparator.reversed();
         return comparator.thenComparingLong(Client::id);
     }
 }

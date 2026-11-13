@@ -18,12 +18,15 @@ public record SqlQuery(String where, List<String> parameters, String orderBy) {
         add(clauses, parameters, "comment", query.filter().commentContains(), false);
         String where = clauses.isEmpty() ? "" : " WHERE " + String.join(" AND ", clauses);
         String order = query.sort().sqlColumn() + " " + query.direction().name();
-        if (query.sort() != ClientSort.ID) order += ", id ASC";
+        if (query.sort() != ClientSort.ID)
+            order += ", id ASC";
         return new SqlQuery(where, parameters, order);
     }
 
-    private static void add(List<String> clauses, List<String> parameters, String column, String value, boolean prefix) {
-        if (value == null) return;
+    private static void add(List<String> clauses, List<String> parameters, String column, String value,
+            boolean prefix) {
+        if (value == null)
+            return;
         clauses.add("lower(" + column + ") LIKE ? ESCAPE '\\'");
         String escaped = value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_");
         parameters.add((prefix ? "" : "%") + escaped + "%");
@@ -31,7 +34,8 @@ public record SqlQuery(String where, List<String> parameters, String orderBy) {
 
     public int bind(PreparedStatement statement) throws SQLException {
         int index = 1;
-        for (String parameter : parameters) statement.setString(index++, parameter);
+        for (String parameter : parameters)
+            statement.setString(index++, parameter);
         return index;
     }
 }

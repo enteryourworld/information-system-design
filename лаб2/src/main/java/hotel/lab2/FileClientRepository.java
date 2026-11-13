@@ -22,13 +22,15 @@ public final class FileClientRepository implements FileRepository {
     public FileClientRepository(Path path, ClientFileCodec codec) {
         this.path = path.toAbsolutePath();
         this.codec = Objects.requireNonNull(codec, "codec");
-        if (Files.exists(this.path)) readAll();
+        if (Files.exists(this.path))
+            readAll();
     }
 
     public List<Client> readAll() {
         try {
             ClientDocument document = codec.read(path);
-            if (document == null) throw new IllegalArgumentException("Пустой документ");
+            if (document == null)
+                throw new IllegalArgumentException("Пустой документ");
             Set<Long> ids = new HashSet<>();
             Set<String> passports = new HashSet<>();
             long maxId = 0;
@@ -56,7 +58,8 @@ public final class FileClientRepository implements FileRepository {
             temporary = Files.createTempFile(path.getParent(), ".clients-", ".tmp");
             codec.write(temporary, new ClientDocument(nextId, clients));
             try {
-                Files.move(temporary, path, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                Files.move(temporary, path, StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
             } catch (AtomicMoveNotSupportedException exception) {
                 Files.move(temporary, path, StandardCopyOption.REPLACE_EXISTING);
             }
@@ -64,7 +67,10 @@ public final class FileClientRepository implements FileRepository {
             throw new RepositoryException("Не удалось записать " + path, exception);
         } finally {
             if (temporary != null) {
-                try { Files.deleteIfExists(temporary); } catch (IOException ignored) { /* Initial error is preserved. */ }
+                try {
+                    Files.deleteIfExists(temporary);
+                } catch (IOException ignored) {
+                    /* Initial error is preserved. */ }
             }
         }
     }
@@ -74,9 +80,11 @@ public final class FileClientRepository implements FileRepository {
     }
 
     public List<ClientShort> getKNShortList(int k, int n) {
-        if (k < 1 || n < 1) throw new IllegalArgumentException("k и n должны быть положительными");
+        if (k < 1 || n < 1)
+            throw new IllegalArgumentException("k и n должны быть положительными");
         long offset = (long) (k - 1) * n;
-        if (offset >= clients.size()) return List.of();
+        if (offset >= clients.size())
+            return List.of();
         int end = (int) Math.min(offset + n, clients.size());
         return clients.subList((int) offset, end).stream().map(Mapper::toShortClient).toList();
     }
@@ -116,9 +124,13 @@ public final class FileClientRepository implements FileRepository {
     }
 
     private void checkPassport(String passport, long excludedId) {
-        if (clients.stream().anyMatch(client -> client.id() != excludedId && client.passport().equals(passport))) {
+        if (clients.stream()
+                .anyMatch(client -> client.id() != excludedId && client.passport().equals(passport))) {
             throw new IllegalArgumentException("Клиент с таким паспортом уже существует");
         }
     }
-    @Override public List<Client> snapshot() { return List.copyOf(clients); }
+    @Override
+    public List<Client> snapshot() {
+        return List.copyOf(clients);
+    }
 }

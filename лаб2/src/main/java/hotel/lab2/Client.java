@@ -3,10 +3,11 @@ package hotel.lab2;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public record Client(long id, String lastName, String firstName, String patronymic,
-                     String phone, LocalDate birthday, String passport, String comment) {
+public record Client(long id, String lastName, String firstName, String patronymic, String phone,
+        LocalDate birthday, String passport, String comment) {
     public Client {
-        if (id < 0) throw new IllegalArgumentException("ID не может быть отрицательным");
+        if (id < 0)
+            throw new IllegalArgumentException("ID не может быть отрицательным");
         lastName = validName(lastName);
         firstName = validName(firstName);
         patronymic = validName(patronymic);
@@ -29,14 +30,13 @@ public record Client(long id, String lastName, String firstName, String patronym
         comment = comment == null || comment.isBlank() ? null : comment.trim();
     }
 
-    public Client(String lastName, String firstName, String patronymic, String phone,
-                  LocalDate birthday, String passport, String comment) {
+    public Client(String lastName, String firstName, String patronymic, String phone, LocalDate birthday,
+            String passport, String comment) {
         this(0, lastName, firstName, patronymic, phone, birthday, passport, comment);
     }
 
     private static String validName(String value) {
-        if (value == null || value.trim().length() > 50
-                || !value.trim().matches("\\p{L}+([ '-]\\p{L}+)*")) {
+        if (value == null || value.trim().length() > 50 || !value.trim().matches("\\p{L}+([ '-]\\p{L}+)*")) {
             throw new IllegalArgumentException("Некорректное имя");
         }
         return value.trim();

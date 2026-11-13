@@ -1,15 +1,19 @@
 package hotel.lab2;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class RepositoryArchitectureTest {
-    @TempDir Path directory;
+    @TempDir
+    Path directory;
 
-    @Test void concreteRepositoriesUseInterfacesAndDelegation() {
+    @Test
+    void concreteRepositoriesUseInterfacesAndDelegation() {
         assertTrue(ClientRepository.class.isInterface());
         assertEquals(Object.class, ClientRepJson.class.getSuperclass());
         assertEquals(Object.class, ClientRepYaml.class.getSuperclass());
@@ -19,7 +23,8 @@ class RepositoryArchitectureTest {
         assertEquals(0, yaml.getCount());
     }
 
-    @Test void nullAndRepeatedIdsAreRejectedWithoutOverwritingMemory() throws Exception {
+    @Test
+    void nullAndInvalidCounterAreRejectedWithoutOverwritingMemory() throws Exception {
         Path file = directory.resolve("clients.json");
         ClientRepJson repo = new ClientRepJson(file);
         Client first = repo.add(ClientRepJsonTest.client("Иванов", "1234567890"));

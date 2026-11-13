@@ -1,0 +1,25 @@
+{
+  "nextId": 3,
+  "clients": [
+    {
+      "id": 1,
+      "lastName": "Иванов",
+      "firstName": "Иван",
+      "patronymic": "Иванович",
+      "phone": "+79991234567",
+      "birthday": "1995-05-10",
+      "passport": "1234567890",
+      "comment": "Постоянный гость"
+    },
+    {
+      "id": 2,
+      "lastName": "Петров",
+      "firstName": "Петр",
+      "patronymic": "Петрович",
+      "phone": "+79990000001",
+      "birthday": "1990-03-15",
+      "passport": "4321098765",
+      "comment": "Предпочитает тихий номер"
+    }
+  ]
+}
