@@ -120,4 +120,5 @@ public final class FileClientRepository implements FileRepository {
             throw new IllegalArgumentException("Клиент с таким паспортом уже существует");
         }
     }
+    @Override public List<Client> snapshot() { return List.copyOf(clients); }
 }

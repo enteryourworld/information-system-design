@@ -20,4 +20,5 @@ public final class ClientRepYaml implements FileRepository {
     @Override public boolean replace(long id, Client client) { return delegate.replace(id, client); }
     @Override public boolean delete(long id) { return delegate.delete(id); }
     @Override public long getCount() { return delegate.getCount(); }
+    @Override public List<Client> snapshot() { return delegate.snapshot(); }
 }

@@ -145,9 +145,15 @@ class FileClientRepository {
   - checkPassport(passport: String, excludedId: long): void
 }
 
+class FileQueryDecorator {
+  - delegate: FileRepository
+  + FileQueryDecorator(delegate: FileRepository)
+}
+
 interface FileRepository {
   + readAll(): List<Client>
   + writeAll(): void
+  + snapshot(): List<Client>
 }
 
 class Mapper {
@@ -198,10 +204,14 @@ DatabaseQueryDecorator ..|> RepositoryDecorator
 DatabaseQueryDecorator ..|> QueryableClientRepository
 DatabaseQueryDecorator --> ClientDbAdapter : оборачивает
 ClientDbAdapter ..|> QueryableClientRepository
+FileQueryDecorator ..|> RepositoryDecorator
+FileQueryDecorator ..|> QueryableClientRepository
+FileQueryDecorator --> FileRepository : оборачивает
 ClientQuery --> ClientFilter
 ClientQuery --> ClientSort
 ClientQuery --> SortDirection
 SqlQuery ..> ClientQuery : параметры
 ClientRepDb ..> SqlQuery
 DatabaseQueryDecorator ..> ClientQuery
+FileQueryDecorator ..> ClientQuery
 @enduml
