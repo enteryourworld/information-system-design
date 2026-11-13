@@ -28,4 +28,9 @@ class QueryTest {
         assertTrue(plan.parameters().get(0).contains("\\_"));
         assertEquals("id DESC", plan.orderBy());
     }
+    @Test
+    void decoratorAddsTheQueryContractToTheBaseAdapter() {
+        assertFalse(QueryableClientRepository.class.isAssignableFrom(ClientDbAdapter.class));
+        assertTrue(QueryableClientRepository.class.isAssignableFrom(DatabaseQueryDecorator.class));
+    }
 }

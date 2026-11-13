@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class ClientDbAdapter implements QueryableClientRepository {
+public final class ClientDbAdapter implements ClientRepository {
     private final ClientRepDb adaptee;
 
     public ClientDbAdapter(ClientRepDb adaptee) {
@@ -39,12 +39,10 @@ public final class ClientDbAdapter implements QueryableClientRepository {
     public long getCount() {
         return adaptee.count();
     }
-    @Override
-    public List<ClientShort> getKNShortList(int k, int n, ClientQuery query) {
+    List<ClientShort> queryPage(int k, int n, ClientQuery query) {
         return adaptee.fetchPage(k, n, query);
     }
-    @Override
-    public long getCount(ClientQuery query) {
+    long queryCount(ClientQuery query) {
         return adaptee.count(query);
     }
 }

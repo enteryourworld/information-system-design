@@ -16,10 +16,10 @@ public final class DatabaseQueryDecorator implements RepositoryDecorator, Querya
     }
     @Override
     public List<ClientShort> getKNShortList(int k, int n, ClientQuery query) {
-        return delegate.getKNShortList(k, n, query);
+        return delegate.queryPage(k, n, query);
     }
     @Override
     public long getCount(ClientQuery query) {
-        return delegate.getCount(query);
+        return delegate.queryCount(query);
     }
 }

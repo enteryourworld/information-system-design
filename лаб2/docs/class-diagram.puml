@@ -35,8 +35,8 @@ class ClientDbAdapter <<Adapter>> {
   + replace(id: long, client: Client): boolean
   + delete(id: long): boolean
   + getCount(): long
-  + getKNShortList(k: int, n: int, query: ClientQuery): List<ClientShort>
-  + getCount(query: ClientQuery): long
+  ~ queryPage(k: int, n: int, query: ClientQuery): List<ClientShort>
+  ~ queryCount(query: ClientQuery): long
 }
 
 class ClientDocument <<record>> {
@@ -267,7 +267,6 @@ RepositoryDecorator --|> ClientRepository
 DatabaseQueryDecorator ..|> RepositoryDecorator
 DatabaseQueryDecorator ..|> QueryableClientRepository
 DatabaseQueryDecorator --> ClientDbAdapter : оборачивает
-ClientDbAdapter ..|> QueryableClientRepository
 FileQueryDecorator ..|> RepositoryDecorator
 FileQueryDecorator ..|> QueryableClientRepository
 FileQueryDecorator --> FileRepository : оборачивает
