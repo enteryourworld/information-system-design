@@ -1,0 +1,109 @@
+@startuml
+!pragma layout smetana
+title ЛР2 — репозитории клиентов гостиницы
+skinparam classAttributeIconSize 0
+skinparam shadowing false
+skinparam monochrome true
+skinparam defaultFontName Arial
+hide empty members
+
+class Client <<record>> {
+  - id: long {readOnly}
+  - lastName: String {readOnly}
+  - firstName: String {readOnly}
+  - patronymic: String {readOnly}
+  - phone: String {readOnly}
+  - birthday: LocalDate {readOnly}
+  - passport: String {readOnly}
+  - comment: String {readOnly}
+  + Client(lastName: String, firstName: String, patronymic: String, phone: String, birthday: LocalDate, passport: String, comment: String)
+  + this()
+  - {static} validName(value: String): String
+  + withId(newId: long): Client
+  + isSameClient(other: Client): boolean
+  + equals(other: Object): boolean
+  + hashCode(): int
+}
+
+class ClientDocument <<record>> {
+  - nextId: long {readOnly}
+  - clients: List<Client> {readOnly}
+}
+
+class ClientFileCodec {
+  - mapper: ObjectMapper
+  - ClientFileCodec(mapper: ObjectMapper)
+  + {static} json(): ClientFileCodec
+  + {static} yaml(): ClientFileCodec
+  + read(path: Path): ClientDocument
+  + write(path: Path, document: ClientDocument): void
+}
+
+class ClientRepJson {
+  - delegate: FileClientRepository
+  + ClientRepJson(path: Path)
+}
+
+class ClientRepYaml {
+  - delegate: FileClientRepository
+  + ClientRepYaml(path: Path)
+}
+
+interface ClientRepository {
+  + getById(id: long): Optional<Client>
+  + getKNShortList(k: int, n: int): List<ClientShort>
+  + sortByLastName(): void
+  + add(client: Client): Client
+  + replace(id: long, client: Client): boolean
+  + delete(id: long): boolean
+  + getCount(): long
+}
+
+class ClientShort <<record>> {
+  - id: long {readOnly}
+  - name: String {readOnly}
+  - phone: String {readOnly}
+}
+
+class FileClientRepository {
+  - path: Path
+  - codec: ClientFileCodec
+  - clients: List<Client>
+  - nextId: long
+  + FileClientRepository(path: Path, codec: ClientFileCodec)
+  + readAll(): List<Client>
+  + writeAll(): void
+  + getById(id: long): Optional<Client>
+  + getKNShortList(k: int, n: int): List<ClientShort>
+  + sortByLastName(): void
+  + add(client: Client): Client
+  + replace(id: long, client: Client): boolean
+  + delete(id: long): boolean
+  + getCount(): long
+  - checkPassport(passport: String, excludedId: long): void
+}
+
+interface FileRepository {
+  + readAll(): List<Client>
+  + writeAll(): void
+}
+
+class Mapper {
+  - Mapper()
+  + {static} toShortClient(client: Client): ClientShort
+}
+
+FileRepository --|> ClientRepository
+ClientRepJson ..|> FileRepository
+ClientRepYaml ..|> FileRepository
+FileClientRepository ..|> FileRepository
+ClientRepJson --> FileClientRepository : делегирует
+ClientRepYaml --> FileClientRepository : делегирует
+FileClientRepository --> ClientFileCodec : формат
+ClientFileCodec ..> ClientDocument : кодирует
+ClientDocument --> Client : clients
+ClientRepository ..> Client : CRUD
+ClientRepository ..> ClientShort : страницы
+Mapper ..> Client
+Mapper ..> ClientShort : создаёт
+@enduml
