@@ -39,6 +39,36 @@ class ClientFileCodec {
   + write(path: Path, document: ClientDocument): void
 }
 
+class ClientRepDb {
+  - url: String
+  - user: String
+  - password: String
+  - sortedByLastName: boolean
+  + ClientRepDb()
+  - connect(): Connection
+  + initializeSchema(): void
+  + try(connect(: Connection connection =)
+  + findById(id: long): Optional<Client>
+  + try(connect(: Connection connection =)
+  + fetchPage(k: int, n: int): List<ClientShort>
+  + try(connect(: Connection connection =)
+  + sortByLastName(): void
+  - orderBy(): String
+  + insert(client: Client): Client
+  + try(connect(: Connection connection =)
+  + bindClient()
+  + update(id: long, client: Client): boolean
+  + try(connect(: Connection connection =)
+  + bindClient()
+  + remove(id: long): boolean
+  + try(connect(: Connection connection =)
+  + count(): long
+  + try(connect(: Connection connection =)
+  - {static} bindClient(statement: PreparedStatement, client: Client): void
+  - {static} readClient(rows: ResultSet): Client
+  - {static} failure(exception: SQLException): RepositoryException
+}
+
 class ClientRepJson {
   - delegate: FileClientRepository
   + ClientRepJson(path: Path)

@@ -13,3 +13,7 @@
 Пункт 2: `ClientRepYaml` предоставляет тот же набор операций для YAML. Формат данных и правила ID/паспорта совпадают с JSON.
 
 Пункт 3 по уточнению: общая иерархия типов построена через `ClientRepository` и `FileRepository`. Конкретные классы не наследуются друг от друга: JSON/YAML-фасады делегируют операции `FileClientRepository`, который использует кодек нужного формата. Общая бизнес-логика не дублируется. Диаграмма — `docs/class-diagram.svg`.
+
+Пункт 4: `ClientRepDb` использует PostgreSQL и обычный JDBC (`PreparedStatement`, `ResultSet`), без ORM и SQLite. SQL-методы: `findById`, `fetchPage`, `insert`, `update`, `remove`, `count`. ID выдаёт PostgreSQL через identity. `sortByLastName` задаёт порядок последующих страниц.
+
+Для PostgreSQL: `docker compose up -d --wait`, затем `mvn -Ppostgres verify`. Профиль запускает интеграционные тесты на реальной БД. Они очищают только учебную таблицу `lab2_clients`; используйте отдельную учебную БД. Подключение задаётся переменными `LAB2_DB_URL`, `LAB2_DB_USER`, `LAB2_DB_PASSWORD` (см. `.env.example`). Сам Java-код не читает `.env` автоматически: переменные нужно экспортировать в окружение.
