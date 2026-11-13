@@ -17,3 +17,5 @@
 Пункт 4: `ClientRepDb` использует PostgreSQL и обычный JDBC (`PreparedStatement`, `ResultSet`), без ORM и SQLite. SQL-методы: `findById`, `fetchPage`, `insert`, `update`, `remove`, `count`. ID выдаёт PostgreSQL через identity. `sortByLastName` задаёт порядок последующих страниц.
 
 Для PostgreSQL: `docker compose up -d --wait`, затем `mvn -Ppostgres verify`. Профиль запускает интеграционные тесты на реальной БД. Они очищают только учебную таблицу `lab2_clients`; используйте отдельную учебную БД. Подключение задаётся переменными `LAB2_DB_URL`, `LAB2_DB_USER`, `LAB2_DB_PASSWORD` (см. `.env.example`). Сам Java-код не читает `.env` автоматически: переменные нужно экспортировать в окружение.
+
+Пункт 5: `Database` — ленивый потокобезопасный Singleton через initialization-on-demand holder. Репозиторий делегирует ему открытие и гарантированное закрытие JDBC-соединения. Одиночка — сервис работы с БД, а не одно общее соединение для всех потоков.

@@ -45,4 +45,17 @@ class PostgresIT {
         assertThrows(RepositoryException.class, () -> repository.insert(first));
         assertEquals(1, repository.count());
     }
+    @Test void singletonClosesConnectionsAfterSuccessAndSqlFailure() throws Exception {
+        var captured = new java.util.concurrent.atomic.AtomicReference<java.sql.Connection>();
+        assertEquals(Integer.valueOf(7), Database.getInstance().withConnection(connection -> {
+            captured.set(connection);
+            return 7;
+        }));
+        assertTrue(captured.get().isClosed());
+        assertThrows(RepositoryException.class, () -> Database.getInstance().withConnection(connection -> {
+            captured.set(connection);
+            throw new java.sql.SQLException("Проверка закрытия");
+        }));
+        assertTrue(captured.get().isClosed());
+    }
 }

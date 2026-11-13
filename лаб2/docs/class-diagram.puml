@@ -40,33 +40,22 @@ class ClientFileCodec {
 }
 
 class ClientRepDb {
-  - url: String
-  - user: String
-  - password: String
+  - database: Database
   - sortedByLastName: boolean
   + ClientRepDb()
-  - connect(): Connection
   + initializeSchema(): void
-  + try(connect(: Connection connection =)
   + findById(id: long): Optional<Client>
-  + try(connect(: Connection connection =)
   + fetchPage(k: int, n: int): List<ClientShort>
-  + try(connect(: Connection connection =)
   + sortByLastName(): void
   - orderBy(): String
   + insert(client: Client): Client
-  + try(connect(: Connection connection =)
   + bindClient()
   + update(id: long, client: Client): boolean
-  + try(connect(: Connection connection =)
   + bindClient()
   + remove(id: long): boolean
-  + try(connect(: Connection connection =)
   + count(): long
-  + try(connect(: Connection connection =)
   - {static} bindClient(statement: PreparedStatement, client: Client): void
   - {static} readClient(rows: ResultSet): Client
-  - {static} failure(exception: SQLException): RepositoryException
 }
 
 class ClientRepJson {
@@ -93,6 +82,16 @@ class ClientShort <<record>> {
   - id: long {readOnly}
   - name: String {readOnly}
   - phone: String {readOnly}
+}
+
+class Database {
+  - url: String
+  - user: String
+  - password: String
+  - Database()
+  + {static} getInstance(): Database
+  + withConnection(work: SqlWork<T>): T
+  + execute(connection: Connection): T
 }
 
 class FileClientRepository {
@@ -136,4 +135,5 @@ ClientRepository ..> Client : CRUD
 ClientRepository ..> ClientShort : страницы
 Mapper ..> Client
 Mapper ..> ClientShort : создаёт
+ClientRepDb --> Database : делегирует SQL
 @enduml
